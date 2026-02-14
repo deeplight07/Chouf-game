@@ -34,11 +34,9 @@ flutter:
     - assets/audio/
 
 flutter_launcher_icons:
-  android: true
+  android: "launcher_icon"
   ios: true
-  image_path: "assets/images/icon.png"
+  image_path: "assets/images/icon.png" 
+  min_sdk_android: 21
   adaptive_icon_background: "#FF6B35"
   adaptive_icon_foreground: "assets/images/icon_foreground.png"
-  web:
-    generate: true
-    image_path: "assets/images/icon.png"
