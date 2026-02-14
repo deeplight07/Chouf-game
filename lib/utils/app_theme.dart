@@ -21,7 +21,7 @@ class AppTheme {
       fontFamily: 'Roboto', // Default, but we should use a font supporting Arabic if possible. 
       // User said "translittération" so Latin characters. Roboto is fine.
       
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: AppColors.cardColor,
         elevation: 4,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
