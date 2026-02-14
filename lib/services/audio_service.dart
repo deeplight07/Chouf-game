@@ -26,7 +26,7 @@ class AudioService {
   
   Future<void> playTimeUp() async {
     try {
-       await _player.play(AssetSource('audio/game_over.mp3'));
+       await _player.play(AssetSource('audio/time_up.mp3'));
     } catch (e) {
       _log.severe('Error playing game over sound', e);
     }
