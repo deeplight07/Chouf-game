@@ -87,70 +87,101 @@ class _GameScreenState extends State<GameScreen> {
         children: [
           // Main Game UI
           if (!_startCountdown)
-            Center(
-              child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min, // Important for Center
-                  children: [
-                    Text(
-                      '${gameManager.timeLeft}',
-                      style: const TextStyle(
-                        fontSize: 32, // Reduced from 40
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                    const SizedBox(height: 12), // Reduced from 20
-                    Container(
-                      width: MediaQuery.of(context).size.width * 0.9,
-                      height: 280, // Slightly reduced from 300 to better fit landscape
-                      decoration: BoxDecoration(
-                        image: const DecorationImage(
-                          image: AssetImage('assets/images/word_card_bg.png'),
-                          fit: BoxFit.cover,
-                        ),
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.3),
-                            blurRadius: 10,
-                            offset: const Offset(0, 5),
+            SafeArea(
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final screenWidth = constraints.maxWidth;
+                  final screenHeight = constraints.maxHeight;
+                  
+                  return Stack(
+                    children: [
+                      // Timer en haut
+                      Positioned(
+                        top: 16,
+                        left: 0,
+                        right: 0,
+                        child: Text(
+                          '${gameManager.timeLeft}',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 32,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white.withOpacity(0.9),
                           ),
-                        ],
+                        ),
                       ),
-                      alignment: Alignment.center,
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: FittedBox(
-                          fit: BoxFit.scaleDown,
-                          child: Text(
-                            gameManager.currentWord,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontSize: 56, 
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                              shadows: [
-                                Shadow(
-                                  offset: Offset(2, 2),
-                                  blurRadius: 4,
-                                  color: Colors.black54,
+                      
+                      // Carte mot centrée avec background
+                      Center(
+                        child: Container(
+                          width: screenWidth * 0.85,
+                          height: screenHeight * 0.6,
+                          decoration: BoxDecoration(
+                            image: const DecorationImage(
+                              image: AssetImage('assets/images/word_card_bg.png'),
+                              fit: BoxFit.cover,
+                            ),
+                            borderRadius: BorderRadius.circular(24),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.3),
+                                blurRadius: 20,
+                                offset: const Offset(0, 10),
+                              ),
+                            ],
+                          ),
+                          child: Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(24),
+                              child: Text(
+                                gameManager.currentWord,
+                                textAlign: TextAlign.center,
+                                maxLines: 3,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: _calculateFontSize(
+                                    gameManager.currentWord, 
+                                    screenWidth,
+                                  ),
+                                  fontWeight: FontWeight.w800,
+                                  color: Colors.white,
+                                  height: 1.2,
+                                  shadows: [
+                                    Shadow(
+                                      offset: const Offset(3, 3),
+                                      blurRadius: 8,
+                                      color: Colors.black.withOpacity(0.7),
+                                    ),
+                                  ],
                                 ),
-                              ],
+                              ).animate().scale(
+                                duration: 250.ms, 
+                                curve: Curves.easeOutBack,
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    ).animate().scale(duration: 300.ms, curve: Curves.easeOutBack),
-                    const SizedBox(height: 12), // Reduced from 20
-                    const Text(
-                      'Place sur ton front !',
-                      style: TextStyle(color: Colors.white70, fontSize: 16), // Reduced from 18
-                    ),
-                  ],
-                ),
+                      
+                      // Instruction en bas
+                      Positioned(
+                        bottom: 24,
+                        left: 0,
+                        right: 0,
+                        child: Text(
+                          'Place sur ton front !',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white.withOpacity(0.8),
+                            letterSpacing: 1.2,
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                },
               ),
             ),
 
@@ -189,5 +220,11 @@ class _GameScreenState extends State<GameScreen> {
         ],
       ),
     );
+  }
+  // Helper pour adapter taille police selon longueur mot
+  double _calculateFontSize(String word, double screenWidth) {
+    if (word.length > 15) return screenWidth * 0.08;
+    if (word.length > 10) return screenWidth * 0.11;
+    return screenWidth * 0.14;
   }
 }
