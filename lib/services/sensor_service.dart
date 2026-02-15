@@ -21,13 +21,13 @@ class SensorService {
         return;
       }
       
-      // event.y > 7.0 => Tilted UP (Skip)
-      // event.y < -7.0 => Tilted DOWN (Correct)
+      // event.x > 7.0 => Tilted UP (Skip)
+      // event.x < -7.0 => Tilted DOWN (Correct)
       
-      if (event.y > _threshold) {
+      if (event.x > _threshold) {
         _tiltController.add(TiltAction.skip);
         _lastTiltTime = now;
-      } else if (event.y < -_threshold) {
+      } else if (event.x < -_threshold) {
         _tiltController.add(TiltAction.correct);
         _lastTiltTime = now;
       }

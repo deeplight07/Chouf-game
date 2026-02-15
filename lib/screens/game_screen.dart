@@ -88,36 +88,69 @@ class _GameScreenState extends State<GameScreen> {
           // Main Game UI
           if (!_startCountdown)
             Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    '${gameManager.timeLeft}',
-                    style: const TextStyle(
-                      fontSize: 40, 
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                    child: Text(
-                      gameManager.currentWord,
-                      textAlign: TextAlign.center,
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min, // Important for Center
+                  children: [
+                    Text(
+                      '${gameManager.timeLeft}',
                       style: const TextStyle(
-                        fontSize: 80, 
+                        fontSize: 32, // Reduced from 40
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),
+                    ),
+                    const SizedBox(height: 12), // Reduced from 20
+                    Container(
+                      width: MediaQuery.of(context).size.width * 0.9,
+                      height: 280, // Slightly reduced from 300 to better fit landscape
+                      decoration: BoxDecoration(
+                        image: const DecorationImage(
+                          image: AssetImage('assets/images/word_card_bg.png'),
+                          fit: BoxFit.cover,
+                        ),
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.3),
+                            blurRadius: 10,
+                            offset: const Offset(0, 5),
+                          ),
+                        ],
+                      ),
+                      alignment: Alignment.center,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            gameManager.currentWord,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontSize: 56, 
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                              shadows: [
+                                Shadow(
+                                  offset: Offset(2, 2),
+                                  blurRadius: 4,
+                                  color: Colors.black54,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
                     ).animate().scale(duration: 300.ms, curve: Curves.easeOutBack),
-                  ),
-                  const SizedBox(height: 20),
-                  const Text(
-                    'Place sur ton front !',
-                    style: TextStyle(color: Colors.white70, fontSize: 18),
-                  ),
-                ],
+                    const SizedBox(height: 12), // Reduced from 20
+                    const Text(
+                      'Place sur ton front !',
+                      style: TextStyle(color: Colors.white70, fontSize: 16), // Reduced from 18
+                    ),
+                  ],
+                ),
               ),
             ),
 

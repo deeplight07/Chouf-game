@@ -18,67 +18,117 @@ class CategoryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: isUnlocked ? onTap : null,
-      child: Card(
-        color: isUnlocked ? Colors.white : Colors.grey[200],
-        child: Stack(
-          children: [
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Icon (using emoji or asset, currently logic supports image mostly)
-                // If iconPath starts with 'assets', use Image.asset, else Text
-                if (category.iconPath.startsWith('assets'))
-                   Expanded(
-                     child: Padding(
-                       padding: const EdgeInsets.all(16.0),
-                       child: Image.asset(category.iconPath, errorBuilder: (c,e,s) => const Icon(Icons.category, size: 48, color: AppColors.primaryOrange)),
-                     ),
-                   )
-                else
-                  Text(category.iconPath, style: const TextStyle(fontSize: 48)),
-                  
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    category.name,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                      color: AppColors.textDark,
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.2),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(20),
+          child: Stack(
+            children: [
+              // Background Image
+              if (category.iconPath.startsWith('assets'))
+                Image.asset(
+                  category.iconPath,
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                  height: double.infinity,
+                  errorBuilder: (c, e, s) => Container(
+                    color: AppColors.primaryOrange.withOpacity(0.2),
+                    child: const Center(
+                      child: Icon(Icons.category, size: 48, color: AppColors.primaryOrange),
                     ),
                   ),
+                )
+              else
+                Container(
+                  color: AppColors.primaryTeal.withOpacity(0.2),
+                  child: Center(
+                    child: Text(category.iconPath, style: const TextStyle(fontSize: 48)),
+                  ),
                 ),
-              ],
-            ),
-            if (!isUnlocked)
+
+              // Gradient Overlay for readability
               Container(
-                decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.5),
-                  borderRadius: BorderRadius.circular(16),
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.transparent,
+                      Colors.black54, // Darker at bottom
+                    ],
+                    stops: [0.5, 1.0],
+                  ),
                 ),
-                child: Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.lock, color: Colors.white, size: 32),
-                      const SizedBox(height: 8),
-                      // "Watch Ad to Unlock" logic would be in onTap wrapper or button
-                      ElevatedButton(
-                        onPressed: onTap, // onTap here triggers the unlock flow
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primaryOrange,
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                          textStyle: const TextStyle(fontSize: 12),
-                        ),
-                        child: const Text('Débloquer'),
-                      )
+              ),
+
+              // Category Name
+              Positioned(
+                bottom: 12,
+                left: 12,
+                right: 12,
+                child: Text(
+                  category.name,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    shadows: [
+                      Shadow(
+                        offset: Offset(0, 1),
+                        blurRadius: 3,
+                        color: Colors.black,
+                      ),
                     ],
                   ),
                 ),
               ),
-          ],
+
+              // Locked Overlay (if locked)
+              if (!isUnlocked) ...[
+                // Darken the whole card more
+                Container(
+                  color: Colors.black.withOpacity(0.4),
+                ),
+                // Lock Icon and Label
+                Positioned(
+                  top: 12,
+                  right: 12,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryOrange,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.lock, size: 14, color: Colors.white),
+                        SizedBox(width: 4),
+                        Text(
+                          'BLOQUÉ', 
+                          style: TextStyle(
+                            color: Colors.white, 
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
         ),
       ),
     );
