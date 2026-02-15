@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../services/game_manager.dart';
 import '../utils/app_colors.dart';
 import 'result_screen.dart';
@@ -19,6 +20,7 @@ class _GameScreenState extends State<GameScreen> {
   bool _startCountdown = true;
   int _countdown = 3;
   Timer? _countdownTimer;
+  bool _showInstruction = true;
 
   @override
   void initState() {
@@ -28,7 +30,6 @@ class _GameScreenState extends State<GameScreen> {
       DeviceOrientation.landscapeLeft,
       DeviceOrientation.landscapeRight,
     ]);
-
     _startCountdownTimer();
   }
 
@@ -41,27 +42,22 @@ class _GameScreenState extends State<GameScreen> {
           _startCountdown = false;
           timer.cancel();
           context.read<GameManager>().startGame();
+          // Masquer l'instruction après 5 secondes
+          Future.delayed(const Duration(seconds: 5), () {
+            if (mounted) setState(() => _showInstruction = false);
+          });
         }
       });
     });
   }
-  
-  // Correction: startGame should be called after countdown.
-  // HomeScreen called startGame.
-  // We should probably pause game in GameManager init or pass a flag "delayedStart".
-  // OR: HomeScreen does NOT call startGame. It passes Category to GameScreen.
-  // GameScreen calls startGame after countdown.
-  // I'll adjust HomeScreen logic in next step or ignore this optimization for MVP.
-  // Actually, if I don't fix it, user loses 3 seconds. That's acceptable for MVP v1.
-  // User can hold phone on forehead during countdown.
-  
+
   @override
   void dispose() {
-    // Reset to Portrait
+    _countdownTimer?.cancel();
+    // Safety net : reset portrait si démonté sans navigation normale
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
     ]);
-    _countdownTimer?.cancel();
     super.dispose();
   }
 
@@ -69,64 +65,100 @@ class _GameScreenState extends State<GameScreen> {
   Widget build(BuildContext context) {
     final gameManager = context.watch<GameManager>();
 
-    // Listen for game end
+    // Forcer portrait AVANT navigation vers ResultScreen
     if (gameManager.status == GameStatus.finished) {
-       // Navigate to Result immediately?
-       // We can use a listener outside build or check here
-       WidgetsBinding.instance.addPostFrameCallback((_) {
-         Navigator.pushReplacement(
-           context,
-           MaterialPageRoute(builder: (context) => const ResultScreen()),
-         );
-       });
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        await SystemChrome.setPreferredOrientations([
+          DeviceOrientation.portraitUp,
+        ]);
+        await Future.delayed(const Duration(milliseconds: 500));
+        if (mounted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const ResultScreen()),
+          );
+        }
+      });
     }
 
     return Scaffold(
       backgroundColor: AppColors.primaryOrange,
       body: Stack(
         children: [
-          // Main Game UI
+          // ── JEU PRINCIPAL ─────────────────────────────────────────────────
           if (!_startCountdown)
             SafeArea(
               child: LayoutBuilder(
                 builder: (context, constraints) {
-                  final screenWidth = constraints.maxWidth;
-                  final screenHeight = constraints.maxHeight;
-                  
+                  final sw = constraints.maxWidth;
+                  final sh = constraints.maxHeight;
+                  final isLowTime = gameManager.timeLeft <= 10;
+
                   return Stack(
                     children: [
-                      // Timer en haut
+                      // ── TIMER : barre de progression + chiffre ────────────
                       Positioned(
-                        top: 16,
-                        left: 0,
-                        right: 0,
-                        child: Text(
-                          '${gameManager.timeLeft}',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 32,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white.withOpacity(0.9),
-                          ),
+                        top: 0,
+                        left: 16,
+                        right: 16,
+                        child: Column(
+                          children: [
+                            const SizedBox(height: 8),
+                            // Chiffre secondes
+                            Text(
+                              '${gameManager.timeLeft}',
+                              style: GoogleFonts.poppins(
+                                fontSize: 28,
+                                fontWeight: FontWeight.w700,
+                                color: isLowTime
+                                    ? Colors.red[200]
+                                    : Colors.white.withOpacity(0.9),
+                              ),
+                            ).animate(
+                              target: isLowTime ? 1 : 0,
+                            ).scaleXY(
+                              begin: 1.0,
+                              end: 1.15,
+                              duration: 300.ms,
+                              curve: Curves.easeInOut,
+                            ),
+                            const SizedBox(height: 4),
+                            // Barre de progression
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(4),
+                              child: LinearProgressIndicator(
+                                value: gameManager.timeLeft / 60.0,
+                                minHeight: 6,
+                                backgroundColor:
+                                    Colors.white.withOpacity(0.25),
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  isLowTime
+                                      ? Colors.red[300]!
+                                      : Colors.white.withOpacity(0.85),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      
-                      // Carte mot centrée avec background
+
+                      // ── CARTE MOT ────────────────────────────────────────
                       Center(
                         child: Container(
-                          width: screenWidth * 0.85,
-                          height: screenHeight * 0.6,
+                          width: sw * 0.82,
+                          height: sh * 0.58,
                           decoration: BoxDecoration(
                             image: const DecorationImage(
-                              image: AssetImage('assets/images/word_card_bg.png'),
+                              image: AssetImage(
+                                  'assets/images/word_card_bg.png'),
                               fit: BoxFit.cover,
                             ),
-                            borderRadius: BorderRadius.circular(24),
+                            borderRadius: BorderRadius.circular(28),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.3),
-                                blurRadius: 20,
-                                offset: const Offset(0, 10),
+                                color: Colors.black.withOpacity(0.35),
+                                blurRadius: 24,
+                                offset: const Offset(0, 12),
                               ),
                             ],
                           ),
@@ -138,93 +170,139 @@ class _GameScreenState extends State<GameScreen> {
                                 textAlign: TextAlign.center,
                                 maxLines: 3,
                                 overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
+                                style: GoogleFonts.poppins(
                                   fontSize: _calculateFontSize(
-                                    gameManager.currentWord, 
-                                    screenWidth,
+                                    gameManager.currentWord,
+                                    sw,
                                   ),
                                   fontWeight: FontWeight.w800,
                                   color: Colors.white,
                                   height: 1.2,
                                   shadows: [
                                     Shadow(
-                                      offset: const Offset(3, 3),
-                                      blurRadius: 8,
-                                      color: Colors.black.withOpacity(0.7),
+                                      offset: const Offset(0, 3),
+                                      blurRadius: 10,
+                                      color: Colors.black.withOpacity(0.6),
                                     ),
                                   ],
                                 ),
                               ).animate().scale(
-                                duration: 250.ms, 
-                                curve: Curves.easeOutBack,
-                              ),
+                                    duration: 250.ms,
+                                    curve: Curves.easeOutBack,
+                                  ),
                             ),
                           ),
                         ),
                       ),
-                      
-                      // Instruction en bas
+
+                      // ── SCORE LIVE (bas gauche) ───────────────────────────
                       Positioned(
-                        bottom: 24,
-                        left: 0,
-                        right: 0,
-                        child: Text(
-                          'Place sur ton front !',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white.withOpacity(0.8),
-                            letterSpacing: 1.2,
-                          ),
+                        bottom: 20,
+                        left: 20,
+                        child: Row(
+                          children: [
+                            Text(
+                              '✅ ${gameManager.score}',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white.withOpacity(0.85),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              '❌ ${gameManager.skipCount}',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white.withOpacity(0.85),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
+
+                      // ── INSTRUCTION (bas droite, disparaît après 5s) ──────
+                      if (_showInstruction)
+                        Positioned(
+                          bottom: 20,
+                          right: 20,
+                          child: Text(
+                            'Place sur ton front !',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.white.withOpacity(0.65),
+                              letterSpacing: 0.8,
+                            ),
+                          ).animate().fadeIn(duration: 400.ms),
+                        ),
                     ],
                   );
                 },
               ),
             ),
 
-          // Countdown Overlay
+          // ── COUNTDOWN OVERLAY ─────────────────────────────────────────────
           if (_startCountdown)
             Container(
-              color: AppColors.primaryTeal,
+              decoration: const BoxDecoration(
+                gradient: RadialGradient(
+                  center: Alignment.center,
+                  radius: 0.85,
+                  colors: [Color(0xFF00BFA5), Color(0xFF009688)],
+                ),
+              ),
               child: Center(
-                child: Text(
-                  '$_countdown',
-                  style: const TextStyle(
-                    fontSize: 120,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ).animate(
-                  onPlay: (controller) => controller.repeat(),
-                ).scale(duration: 500.ms).fadeOut(delay: 500.ms),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      '$_countdown',
+                      style: GoogleFonts.poppins(
+                        fontSize: 150,
+                        fontWeight: FontWeight.w900,
+                        color: Colors.white,
+                        height: 1.0,
+                        shadows: const [
+                          Shadow(
+                            offset: Offset(0, 4),
+                            blurRadius: 20,
+                            color: Color(0x60000000),
+                          ),
+                        ],
+                      ),
+                    ).animate(
+                      onPlay: (controller) => controller.repeat(),
+                    ).scale(
+                      begin: const Offset(0.8, 0.8),
+                      end: const Offset(1.05, 1.05),
+                      duration: 600.ms,
+                      curve: Curves.easeOut,
+                    ).fadeOut(delay: 600.ms, duration: 300.ms),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Prépare-toi !',
+                      style: GoogleFonts.poppins(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w400,
+                        color: Colors.white.withOpacity(0.70),
+                        letterSpacing: 1.5,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-            
-          // Helper instructions (Testing only)
-          /*
-          Positioned(
-            bottom: 20,
-            right: 20,
-            child: Row(
-              children: [
-                FloatingActionButton(onPressed: () => gameManager.handleTiltTest(TiltAction.correct), child: Icon(Icons.check)),
-                SizedBox(width: 10),
-                FloatingActionButton(onPressed: () => gameManager.handleTiltTest(TiltAction.skip), child: Icon(Icons.close)),
-              ],
-            ),
-          )
-          */
         ],
       ),
     );
   }
-  // Helper pour adapter taille police selon longueur mot
+
   double _calculateFontSize(String word, double screenWidth) {
-    if (word.length > 15) return screenWidth * 0.08;
-    if (word.length > 10) return screenWidth * 0.11;
-    return screenWidth * 0.14;
+    if (word.length > 18) return screenWidth * 0.075;
+    if (word.length > 12) return screenWidth * 0.095;
+    if (word.length > 8)  return screenWidth * 0.11;
+    return screenWidth * 0.135;
   }
 }

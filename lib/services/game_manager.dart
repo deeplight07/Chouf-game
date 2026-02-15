@@ -34,6 +34,9 @@ class GameManager extends ChangeNotifier {
   GameSession? get session => _currentSession;
   String get currentWord => _currentWord;
   int get score => _currentSession?.score ?? 0;
+  // Nombre de mots skippés (pour le score live)
+  int get skipCount =>
+      (_currentSession?.results.where((r) => !r.isCorrect).length) ?? 0;
 
   void prepareGame(CategoryModel category) {
     _currentSession = GameSession(category: category);
