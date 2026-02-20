@@ -164,29 +164,33 @@ class _GameScreenState extends State<GameScreen> {
                           ),
                           child: Center(
                             child: Padding(
-                              padding: const EdgeInsets.all(24),
-                              child: Text(
-                                gameManager.currentWord,
-                                textAlign: TextAlign.center,
-                                maxLines: 3,
-                                overflow: TextOverflow.ellipsis,
-                                style: GoogleFonts.poppins(
-                                  fontSize: _calculateFontSize(
-                                    gameManager.currentWord,
-                                    sw,
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 32, vertical: 20),
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Text(
+                                  gameManager.currentWord,
+                                  textAlign: TextAlign.center,
+                                  maxLines: 1,
+                                  softWrap: false,
+                                  style: GoogleFonts.poppins(
+                                    fontSize: sw * 0.15,
+                                    fontWeight: FontWeight.w800,
+                                    color: Colors.white,
+                                    height: 1.2,
+                                    shadows: [
+                                      Shadow(
+                                        offset: const Offset(0, 3),
+                                        blurRadius: 10,
+                                        color:
+                                            Colors.black.withOpacity(0.6),
+                                      ),
+                                    ],
                                   ),
-                                  fontWeight: FontWeight.w800,
-                                  color: Colors.white,
-                                  height: 1.2,
-                                  shadows: [
-                                    Shadow(
-                                      offset: const Offset(0, 3),
-                                      blurRadius: 10,
-                                      color: Colors.black.withOpacity(0.6),
-                                    ),
-                                  ],
                                 ),
-                              ).animate().scale(
+                              )
+                                  .animate()
+                                  .scale(
                                     duration: 250.ms,
                                     curve: Curves.easeOutBack,
                                   ),
@@ -299,10 +303,4 @@ class _GameScreenState extends State<GameScreen> {
     );
   }
 
-  double _calculateFontSize(String word, double screenWidth) {
-    if (word.length > 18) return screenWidth * 0.075;
-    if (word.length > 12) return screenWidth * 0.095;
-    if (word.length > 8)  return screenWidth * 0.11;
-    return screenWidth * 0.135;
-  }
 }

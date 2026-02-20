@@ -8,7 +8,7 @@ import 'services/audio_service.dart';
 import 'services/game_manager.dart';
 import 'services/sensor_service.dart';
 import 'services/storage_service.dart';
-import 'screens/home_screen.dart';
+import 'screens/splash_screen.dart';
 import 'utils/app_theme.dart';
 
 void main() async {
@@ -53,7 +53,7 @@ class ChoufGameApp extends StatelessWidget {
       title: 'Chouf Game',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
-      home: const HomeScreen(),
+      home: const SplashScreen(),
     );
   }
 }

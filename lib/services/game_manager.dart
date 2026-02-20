@@ -84,26 +84,27 @@ class GameManager extends ChangeNotifier {
     notifyListeners();
   }
 
-  void _handleTilt(TiltAction action) async {
+  void _handleTilt(TiltAction action) {
     if (_status != GameStatus.playing || _isProcessingTilt) return;
-    
+
     _isProcessingTilt = true;
-    
-    
+
     if (action == TiltAction.correct) {
-      await _audioService.playDing();
-      if (await Vibration.hasVibrator() ?? false) Vibration.vibrate(duration: 200);
+      _audioService.playDing();
+      Vibration.hasVibrator().then((hasVibrator) {
+        if (hasVibrator ?? false) Vibration.vibrate(duration: 200);
+      });
       _currentSession?.addResult(_currentWord, true);
     } else if (action == TiltAction.skip) {
-      await _audioService.playBuzz();
-      if (await Vibration.hasVibrator() ?? false) Vibration.vibrate(duration: 500);
+      _audioService.playBuzz();
+      Vibration.hasVibrator().then((hasVibrator) {
+        if (hasVibrator ?? false) Vibration.vibrate(duration: 500);
+      });
       _currentSession?.addResult(_currentWord, false);
     }
-    
+
     _nextWord();
-    
-    // Reset processing flag immediately as SensorService has 1000ms cooldown.
-    _isProcessingTilt = false; 
+    _isProcessingTilt = false;
     notifyListeners();
   }
 

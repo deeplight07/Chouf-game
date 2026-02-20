@@ -236,12 +236,15 @@ class _ResultScreenState extends State<ResultScreen> {
               height: 54,
               child: ElevatedButton.icon(
                 onPressed: () => _shareResult(session),
-                icon: const Icon(Icons.share_rounded, size: 20),
-                label: Text(
-                  'Partager',
-                  style: GoogleFonts.poppins(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
+                icon: const Icon(Icons.share_rounded, size: 18),
+                label: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    'Partager',
+                    style: GoogleFonts.poppins(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
                 style: ElevatedButton.styleFrom(
@@ -264,12 +267,15 @@ class _ResultScreenState extends State<ResultScreen> {
               child: ElevatedButton.icon(
                 onPressed: () =>
                     Navigator.popUntil(context, (route) => route.isFirst),
-                icon: const Icon(Icons.replay_rounded, size: 20),
-                label: Text(
-                  'Rejouer',
-                  style: GoogleFonts.poppins(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
+                icon: const Icon(Icons.replay_rounded, size: 18),
+                label: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    'Rejouer',
+                    style: GoogleFonts.poppins(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
                 style: ElevatedButton.styleFrom(

@@ -3,41 +3,60 @@ import 'package:sensors_plus/sensors_plus.dart';
 
 enum TiltAction { correct, skip }
 
+/// State machine for tilt detection.
+/// neutral -> tilted (action emitted) -> wait for angular velocity to drop -> neutral
+enum _TiltState { neutral, tilted }
+
 class SensorService {
   StreamSubscription<GyroscopeEvent>? _subscription;
   final StreamController<TiltAction> _tiltController =
       StreamController<TiltAction>.broadcast();
 
   DateTime? _lastTiltTime;
-  // Cooldown augmenté à 1000ms pour éviter les faux positifs en paysage
-  static const int _cooldownMs = 1000;
 
-  // Seuil de vitesse angulaire (rad/s)
-  static const double _angularThreshold = 2.5;
+  // Cooldown increased to 1200ms for more deliberate actions
+  static const int _cooldownMs = 1200;
+
+  // Threshold raised: require more deliberate movement (was 2.5)
+  static const double _angularThreshold = 3.5;
+
+  // Neutral zone: angular velocity must drop below this before next tilt accepted
+  static const double _neutralThreshold = 1.0;
+
+  _TiltState _tiltState = _TiltState.neutral;
 
   Stream<TiltAction> get tiltStream => _tiltController.stream;
 
   void startListening() {
+    _tiltState = _TiltState.neutral;
     _subscription = gyroscopeEventStream().listen((GyroscopeEvent event) {
       final now = DateTime.now();
+
+      // If currently in "tilted" state, wait for return to neutral
+      if (_tiltState == _TiltState.tilted) {
+        if (event.y.abs() < _neutralThreshold) {
+          _tiltState = _TiltState.neutral;
+        }
+        return; // Don't process any tilt while not neutral
+      }
+
+      // Cooldown check
       if (_lastTiltTime != null &&
           now.difference(_lastTiltTime!).inMilliseconds < _cooldownMs) {
         return;
       }
 
-      // En paysage (landscapeLeft), téléphone sur le front :
-      // Les axes du gyroscope restent dans le référentiel PORTRAIT du téléphone.
-      // event.y = rotation autour de l'axe vertical portrait = pitch en paysage
-      // Quand on penche la tête AVANT (écran vers sol) → event.y NÉGATIF → CORRECT
-      // Quand on penche la tête ARRIÈRE (écran vers ciel) → event.y POSITIF → SKIP
-      // Note : si les tilts sont inversés sur l'appareil, inverser les deux conditions.
-
+      // En paysage (landscapeLeft), telephone sur le front :
+      // event.y negatif = tete penche AVANT (ecran vers sol) = CORRECT
+      // event.y positif = tete penche ARRIERE (ecran vers ciel) = SKIP
       if (event.y < -_angularThreshold) {
-        _tiltController.add(TiltAction.correct);  // Tête penche AVANT → SOL → CORRECT
+        _tiltController.add(TiltAction.correct);
         _lastTiltTime = now;
+        _tiltState = _TiltState.tilted;
       } else if (event.y > _angularThreshold) {
-        _tiltController.add(TiltAction.skip);     // Tête penche ARRIÈRE → CIEL → SKIP
+        _tiltController.add(TiltAction.skip);
         _lastTiltTime = now;
+        _tiltState = _TiltState.tilted;
       }
     });
   }
@@ -45,6 +64,7 @@ class SensorService {
   void stopListening() {
     _subscription?.cancel();
     _subscription = null;
+    _tiltState = _TiltState.neutral;
   }
 
   void dispose() {

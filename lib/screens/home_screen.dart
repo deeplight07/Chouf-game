@@ -237,49 +237,54 @@ class _HomeScreenState extends State<HomeScreen> {
       child: SafeArea(
         bottom: false,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(24, 20, 24, 28),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
+          child: Row(
             children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    'CHOUF!',
-                    style: GoogleFonts.poppins(
-                      fontSize: 36,
-                      fontWeight: FontWeight.w900,
-                      color: Colors.white,
-                      height: 1.0,
-                      shadows: const [
-                        Shadow(
-                          offset: Offset(0, 2),
-                          blurRadius: 8,
-                          color: Color(0x50000000),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  const Text('🇲🇦', style: TextStyle(fontSize: 28)),
-                ],
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'شوف',
-                style: GoogleFonts.poppins(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w400,
-                  color: Colors.white.withOpacity(0.80),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(14),
+                child: Image.asset(
+                  'assets/images/icon.png',
+                  width: 48,
+                  height: 48,
                 ),
               ),
-              const SizedBox(height: 10),
-              Text(
-                'Choisis une catégorie :',
-                style: GoogleFonts.poppins(
-                  fontSize: 14,
-                  color: Colors.white.withOpacity(0.70),
-                  fontWeight: FontWeight.w400,
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          'CHOUF!',
+                          style: GoogleFonts.poppins(
+                            fontSize: 28,
+                            fontWeight: FontWeight.w900,
+                            color: Colors.white,
+                            height: 1.1,
+                            shadows: const [
+                              Shadow(
+                                offset: Offset(0, 2),
+                                blurRadius: 8,
+                                color: Color(0x50000000),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        const Text('🇲🇦', style: TextStyle(fontSize: 22)),
+                      ],
+                    ),
+                    Text(
+                      'Le jeu marocain',
+                      style: GoogleFonts.poppins(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w400,
+                        color: Colors.white.withOpacity(0.70),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
