@@ -265,8 +265,14 @@ class _ResultScreenState extends State<ResultScreen> {
             child: SizedBox(
               height: 54,
               child: ElevatedButton.icon(
-                onPressed: () =>
-                    Navigator.popUntil(context, (route) => route.isFirst),
+                onPressed: () async {
+                    await SystemChrome.setPreferredOrientations([
+                      DeviceOrientation.portraitUp,
+                    ]);
+                    if (context.mounted) {
+                      Navigator.popUntil(context, (route) => route.isFirst);
+                    }
+                  },
                 icon: const Icon(Icons.replay_rounded, size: 18),
                 label: FittedBox(
                   fit: BoxFit.scaleDown,

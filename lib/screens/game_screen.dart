@@ -83,7 +83,19 @@ class _GameScreenState extends State<GameScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.primaryOrange,
-      body: Stack(
+      body: OrientationBuilder(
+        builder: (context, orientation) {
+          // Si le viewport est encore en portrait (transition en cours),
+          // afficher un écran orange d'attente pour éviter le demi-écran noir.
+          if (orientation == Orientation.portrait) {
+            return const Center(
+              child: CircularProgressIndicator(
+                color: Colors.white,
+                strokeWidth: 3,
+              ),
+            );
+          }
+          return Stack(
         children: [
           // ── JEU PRINCIPAL ─────────────────────────────────────────────────
           if (!_startCountdown)
@@ -299,7 +311,9 @@ class _GameScreenState extends State<GameScreen> {
               ),
             ),
         ],
-      ),
+      ); // Stack
+        }, // OrientationBuilder builder
+      ), // OrientationBuilder
     );
   }
 
